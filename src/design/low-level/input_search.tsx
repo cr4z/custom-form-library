@@ -1,0 +1,51 @@
+import { Autocomplete, TextField } from "@mui/material";
+import { placeholderForFutureLogErrorText } from "../../temp/errorText";
+import { useState } from "react";
+
+export interface SearchProps<T> {
+  options: T[];
+  onSelect: (selectedOption: T) => void;
+  getOptionLabel: (option: T) => string;
+  label: string;
+  setValues?: boolean;
+}
+
+export function XNGSearch<T>(props: SearchProps<T>) {
+  const [searchValue, setSearchValue] = useState<string>("");
+  const [selectedValue, setSelectedValue] = useState<T>();
+
+  function handleSearchChange(event: React.ChangeEvent<HTMLInputElement>) {
+    setSearchValue(event.target.value);
+  }
+
+  function handleSelectionChange(event: React.ChangeEvent<{}>, selectedOption: T | null) {
+    if (!selectedOption) throw new Error(placeholderForFutureLogErrorText);
+    if (props.setValues) {
+      setSearchValue(props.getOptionLabel(selectedOption));
+      setSelectedValue(selectedOption);
+    }
+    props.onSelect(selectedOption);
+  }
+
+  return (
+    <Autocomplete
+      options={props.options}
+      getOptionLabel={props.getOptionLabel}
+      renderInput={(params) => (
+        <TextField
+          {...params}
+          size="small"
+          label={props.label}
+          variant="outlined"
+          onChange={handleSearchChange}
+        />
+      )}
+      value={props.setValues ? selectedValue : null}
+      onChange={handleSelectionChange}
+      inputValue={searchValue}
+      autoSelect
+      autoHighlight
+      disableClearable={props.setValues}
+    />
+  );
+}
